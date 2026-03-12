@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Capstone Presentation: Disease Prediction System</title>
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+		
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg: #010409;
+                --primary: #22d3ee;
+                --secondary: #818cf8;
+                --accent: #f43f5e;
+                --text: #e2e8f0;
+                --glass: rgba(15, 23, 42, 0.7);
+                --glass-border: rgba(255, 255, 255, 0.1);
+            }
+
+            .reveal { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+            .reveal h1, .reveal h2, .reveal h3 { font-family: 'Outfit', sans-serif; text-transform: none; color: var(--text); }
+            .reveal h1 { font-weight: 700; font-size: 2.2em; text-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+            .reveal h2 { font-weight: 600; color: var(--primary); margin-bottom: 30px; border-bottom: 2px solid rgba(34, 211, 238, 0.1); display: inline-block; padding-bottom: 10px; }
+
+            .glass-card {
+                background: var(--glass);
+                backdrop-filter: blur(20px);
+                border: 1px solid var(--glass-border);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+                margin: 15px 0;
+                text-align: left;
+            }
+
+            .accent-text { color: var(--primary); font-weight: 600; }
+            .tech-pill {
+                display: inline-block;
+                padding: 5px 15px;
+                background: rgba(34, 211, 238, 0.1);
+                border: 1px solid rgba(34, 211, 238, 0.3);
+                border-radius: 20px;
+                font-size: 0.5em;
+                margin: 5px;
+                color: var(--primary);
+            }
+
+            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+            
+            .reveal ul { list-style: none; margin: 0; font-size: 0.8em; }
+            .reveal ul li { position: relative; padding-left: 25px; margin-bottom: 12px; }
+            .reveal ul li::before {
+                content: '→';
+                position: absolute;
+                left: 0;
+                color: var(--primary);
+                font-weight: bold;
+            }
+
+            .model-stat {
+                border-left: 3px solid var(--secondary);
+                padding-left: 15px;
+                margin: 10px 0;
+            }
+            .model-name { font-size: 0.6em; text-transform: uppercase; color: var(--secondary); opacity: 0.8; }
+            .model-metric { font-size: 1.2em; font-weight: 700; color: #fff; }
+
+            .hero-img {
+                width: 100%;
+                height: 250px;
+                border-radius: 15px;
+                object-fit: cover;
+                margin-bottom: 20px;
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+        </style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">                <!-- 1. TITLE -->
+				<section>
+                    <div class="glass-card" style="text-align: center;">
+					    <h1>Disease Prediction & Risk Assessment</h1>
+                        <p style="font-size: 0.6em; margin-top: 20px; color: var(--primary);">AI-Powered Cardiometabolic-Renal Integration</p>
+                        <div style="margin-top: 40px; font-size: 0.45em; display: flex; justify-content: space-between; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                            <div>
+                                <span class="accent-text">UCF 439 | CAPSTONE</span><br>
+                                Group No: [Group No]<br>
+                                Students: [Names] | [Emails]
+                            </div>
+                            <div>
+                                <span class="accent-text">MODE B</span><br>
+                                [Company Name]<br>
+                                SAP ID: [ID]
+                            </div>
+                            <div>
+                                <span class="accent-text">SUPERVISOR</span><br>
+                                [Supervisor Name]<br>
+                                [Email]
+                            </div>
+                        </div>
+                    </div>
+				</section>
+
+                <!-- 2. INTRODUCTION -->
+				<section>
+					<h2>01. Introduction</h2>
+                    <div class="glass-card">
+                        <p style="font-size: 0.8em;">Objective: To develop an <span class="accent-text">Integrated Clinical Assistant</span> for diagnostic screening.</p>
+                        <p style="font-size: 0.6em; opacity: 0.8; margin-top: 20px;">We tackle the "Siloed Diagnosis" problem by aggregating risk across 4 major chronic conditions into a single <strong>CHRI Score</strong>.</p>
+                    </div>
+                    <div style="display: flex; justify-content: space-around; margin-top: 30px;">
+                        <span class="tech-pill">HEART</span>
+                        <span class="tech-pill">DIABETES</span>
+                        <span class="tech-pill">STROKE</span>
+                        <span class="tech-pill">CKD</span>
+                    </div>
+				</section>
+
+                <!-- 3. BACKGROUND / RELATED WORK -->
+                <section>
+                    <h2>02. Background & Context</h2>
+                    <div class="grid-2">
+                        <div class="glass-card" style="font-size: 0.55em;">
+                            <h3 style="font-size: 1.1em; color: var(--secondary);">The Problem</h3>
+                            <ul>
+                                <li>Fragmented healthcare data leads to missed "Comorbidity" risks.</li>
+                                <li>High False Negative rates in standard screening.</li>
+                                <li>Need for early intervention in renal-cardiac pathways.</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card" style="font-size: 0.55em;">
+                            <h3 style="font-size: 1.1em; color: var(--primary);">Related Work</h3>
+                            <ul>
+                                <li>WHO Cardiovascular Risk Tables.</li>
+                                <li>Framingham Heart Study (Single-domain).</li>
+                                <li>Our Improvement: Multi-domain Ensemble Integration.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. FEASIBILITY STUDY -->
+                <section>
+                    <h2>03. Feasibility Study</h2>
+                    <div class="glass-card">
+                        <div class="grid-2">
+                            <div>
+                                <h3 style="font-size: 0.7em; color: var(--primary);">Technical</h3>
+                                <p style="font-size: 0.5em;">Verified Python/FastAPI stack for real-time inference. Availability of massive medical datasets (UCI/Kaggle).</p>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 0.7em; color: var(--secondary);">Financial / Social</h3>
+                                <p style="font-size: 0.5em;">Low compute cost via cloud-native architecture. Significant social impact via early disease prevention.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. WORK DONE: DATA ENGINEERING -->
+                <section>
+                    <h2>04. Work Done: Engineering</h2>
+                    <div class="glass-card">
+                        <h3 style="font-size: 0.7em; opacity: 0.7;">Weeks 1-2: Foundation</h3>
+                        <ul style="font-size: 0.6em;">
+                            <li><strong>Unified Preprocessing:</strong> Custom `ColumnTransformer` pipelines.</li>
+                            <li><strong>SMOTE Implementation:</strong> Balanced 5% Stroke minority cases.</li>
+                            <li><strong>Robust Scaling:</strong> Handled biological outliers in blood pressure & glucose data.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 5. WORK DONE: OPTIMIZATION -->
+                <section>
+                    <h2>04. Work Done: Optimization</h2>
+                    <div class="glass-card">
+                        <h3 style="font-size: 0.7em; opacity: 0.7;">Weeks 3-4: Tuning & Ensembles</h3>
+                        <div class="grid-2">
+                            <ul style="font-size: 0.5em;">
+                                <li>GridSearchCV for optimal Params.</li>
+                                <li>Implemented <strong>Soft Voting</strong> Consensus.</li>
+                                <li>Defined <strong>CHRI Weighted Metric</strong> for mortality risk.</li>
+                            </ul>
+                            <div style="text-align: right;">
+                                <span class="tech-pill">LOGISTIC REG</span>
+                                <span class="tech-pill">RANDOM FOREST</span>
+                                <span class="tech-pill">SVM</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. WORK DONE: DIABETES CASE STUDY -->
+                <section>
+                    <h2>04. Work Done: Performance Optimization</h2>
+                    <div class="glass-card">
+                        <h3 style="font-size: 0.7em; color: var(--accent);">Diabetes Optimization Study (Week 5)</h3>
+                        <p style="font-size: 0.5em; margin-bottom: 10px;">Initial Evaluation: 63.0% Recall (Sub-optimal).</p>
+                        <div class="grid-2">
+                            <div class="model-stat">
+                                <div class="model-name">Action Taken</div>
+                                <div class="model-metric" style="font-size: 0.7em;">SVM Pruning + Threshold 0.4</div>
+                            </div>
+                            <div class="model-stat" style="border-left-color: var(--primary);">
+                                <div class="model-name">New Result</div>
+                                <div class="model-metric" style="color: var(--primary);">87.0% Recall (+24%)</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. WORK DONE: THE METRICS -->
+                <section>
+                    <h2>04. Work Done: Current Results</h2>
+                    <div class="glass-card">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="model-stat">
+                                <div class="model-name">Heart Disease</div>
+                                <div class="model-metric">93% Recall</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="model-name">Diabetes (Opt)</div>
+                                <div class="model-metric">87% Recall</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="model-name">Stroke</div>
+                                <div class="model-metric">78% Recall</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="model-name">CKD</div>
+                                <div class="model-metric">100% Accuracy</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. WORK DONE: SYSTEM ARCHITECTURE -->
+                <section>
+                    <h2>04. Work Done: Backend</h2>
+                    <div class="glass-card">
+                        <ul style="font-size: 0.6em;">
+                            <li><strong>FastAPI Implementation:</strong> Sub-millisecond inference endpoints.</li>
+                            <li><strong>Pydantic Validation:</strong> Type-safety for medical inputs.</li>
+                            <li><strong>Automated Inference:</strong> Backend handles raw data to normalized prediction automatically.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 5. REMAINING WORK -->
+                <section>
+                    <h2>05. Remaining Work</h2>
+                    <div class="grid-2">
+                        <div class="glass-card">
+                            <h3 style="font-size: 0.7em; color: var(--secondary);">Dashboard Integration</h3>
+                            <p style="font-size: 0.45em;">Connecting the React/FastAPI stack for real-time visualization of health gauges.</p>
+                        </div>
+                        <div class="glass-card">
+                            <h3 style="font-size: 0.7em; color: var(--secondary);">PDF Reporting</h3>
+                            <p style="font-size: 0.45em;">Automated clinical summary generation for patients.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. TIMELINE -->
+                <section>
+                    <h2>06. Project Timeline</h2>
+                    <div class="glass-card" style="font-size: 0.55em;">
+                        <p><span class="accent-text">W1-2:</span> Data cleaning & Pipelines (DONE)</p>
+                        <p><span class="accent-text">W3-4:</span> Ensemble development & Weighted Scoring (DONE)</p>
+                        <p><span class="accent-text">W5:</span> Optimization & API Deployment (CURRENT)</p>
+                        <p style="opacity: 0.8;"><span style="color: #f59e0b;">W6:</span> UI Finalization & Gauge Integration (PENDING)</p>
+                        <p style="opacity: 0.5;"><span style="color: #64748b;">W7-8:</span> System Testing & Final Handover (PLANNED)</p>
+                    </div>
+                </section>
+
+                <!-- 7. ADDITIONS: RELIABILITY -->
+                <section>
+                    <h2>07. Medical Reliability</h2>
+                    <div class="glass-card">
+                        <p style="font-size: 0.65em;">Verified AI logic using <strong>Permutation Importance</strong> against WHO clinical standards.</p>
+                        <div style="font-size: 0.5em; margin-top: 15px; color: var(--primary);">
+                           CKD relies on Hemoglobin | Diabetes relies on Glucose | Heart relies on Vessel count (CA)
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CONCLUSION -->
+                <section style="text-align: center;">
+                    <h2 class="accent-text" style="font-size: 2em; border: none;">Thank You</h2>
+                    <p style="font-size: 0.8em; opacity: 0.8;">Toward an Integrated AI Clinical Assistant</p>
+                    <div class="glass-card" style="display: inline-block; padding: 20px 50px; margin-top: 40px;">
+                        <span>QUESTIONS & FEEDBACK</span>
+                    </div>
+                </section>
+section>
+
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+		<script>
+			Reveal.initialize({
+				hash: true,
+                center: true,
+                transition: 'convex',
+                controls: true,
+                progress: true,
+                slideNumber: 'c/t'
+			});
+		</script>
+	</body>
+</html>
