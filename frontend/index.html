@@ -3,148 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disease Prediction & Decision Support</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <title>AI Health Navigator</title>
+    <!-- Modern Typefaces -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for robust icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div id="app">
-        <!-- HEADER -->
-        <header class="glass-header">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fa-solid fa-heart-pulse logo-icon"></i> 
-                    <span>AI Health <strong class="gradient-text">Decision Support</strong></span>
+
+    <!-- Header -->
+    <header class="glass-header">
+        <div class="header-inner">
+            <a href="#" class="logo" onclick="resetView()">
+                <i class="fa-solid fa-leaf"></i>
+                <span>Health <span class="text-gradient">Navigator</span></span>
+            </a>
+        </div>
+    </header>
+
+    <main class="app-container">
+        
+        <!-- ==============================================
+             VIEW 1: INPUT FORM
+        =============================================== -->
+        <section id="input-view" class="view active-view">
+            
+            <div class="input-hero animate-in">
+                <h2>Understand Your Health Better</h2>
+                <p class="mt-2">Enter your current vitals to get a personalized health assessment, risk breakdown, and actionable next steps.</p>
+            </div>
+
+            <div class="glass-panel form-wrapper animate-in delay-1">
+                <form id="health-form">
+                    <div class="form-grid">
+                        <div class="input-field">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" required placeholder="e.g. 55" min="18" max="120">
+                        </div>
+                        <div class="input-field">
+                            <label for="bmi">BMI (Body Mass Index)</label>
+                            <input type="number" id="bmi" step="0.1" required placeholder="e.g. 28.5">
+                        </div>
+                        <div class="input-field">
+                            <label for="glucose">Glucose Level (mg/dL)</label>
+                            <input type="number" id="glucose" required placeholder="e.g. 110">
+                        </div>
+                        <div class="input-field">
+                            <label for="bp">Blood Pressure (Systolic)</label>
+                            <input type="number" id="bp" required placeholder="e.g. 130">
+                        </div>
+                        <div class="input-field">
+                            <label for="hypertension">History of High Blood Pressure?</label>
+                            <select id="hypertension">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label for="location">Your City</label>
+                            <input type="text" id="location" required placeholder="e.g. Mumbai">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="autoFillMockData()">
+                            <i class="fa-solid fa-vial"></i> Load Sample Patient
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span id="submitText">Get Health Assessment</span>
+                            <div class="loader hidden" id="submitLoader"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 2: RESULTS DASHBOARD
+        =============================================== -->
+        <section id="results-view" class="view">
+            
+            <div class="dashboard-nav animate-in">
+                <h2>Your Health Assessment Dashboard</h2>
+                <button class="btn btn-secondary" onclick="resetView()">
+                    <i class="fa-solid fa-arrow-left"></i> Start Over
+                </button>
+            </div>
+
+            <!-- MANDATORY A: Clinical Health Risk Summary -->
+            <div class="glass-panel ai-summary-card animate-in delay-1">
+                <div class="ai-summary-header">
+                    <i class="fa-solid fa-stethoscope fa-lg"></i>
+                    <h3 style="font-size: 1.1rem">Clinical Summary</h3>
+                </div>
+                <p class="ai-summary-text" id="aiSummaryText">
+                    <!-- JS populated: "You have a HIGH risk of... " -->
+                </p>
+            </div>
+
+            <!-- BENTO GRID -->
+            <div class="bento-grid">
+                
+                <!-- C: CHRI Score Section -->
+                <div class="glass-panel bento-item col-span-4 animate-in delay-1">
+                    <h3 class="bento-title"><i class="fa-solid fa-heart-circle-check"></i> Overall Health Score</h3>
+                    <div class="chri-display">
+                        <div class="chri-circle-wrap">
+                            <div class="chri-progress" id="chriProgress"></div>
+                            <div class="chri-inner">
+                                <span class="chri-value" id="scoreValue">--</span>
+                            </div>
+                        </div>
+                        <div class="chri-label" id="scoreLabel">Analyzing...</div>
+                        <p class="text-sm text-center text-muted mt-2">Combined cardiometabolic index</p>
+                        
+                        <!-- Benchmark Legend -->
+                        <div class="risk-benchmark">
+                            <div class="benchmark-item">
+                                <div class="bench-color" style="background: var(--health-good)"></div>
+                                <div class="bench-text">0-20<br>Low</div>
+                            </div>
+                            <div class="benchmark-item">
+                                <div class="bench-color" style="background: var(--health-warn)"></div>
+                                <div class="bench-text">20-40<br>Mod</div>
+                            </div>
+                            <div class="benchmark-item">
+                                <div class="bench-color" style="background: var(--health-alert)"></div>
+                                <div class="bench-text">40-70<br>High</div>
+                            </div>
+                            <div class="benchmark-item">
+                                <div class="bench-color" style="background: #b91c1c"></div>
+                                <div class="bench-text">70+<br>Crit</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- E: Action Recommendation Section (VERY IMPORTANT) -->
+                <div class="glass-panel bento-item col-span-8 animate-in delay-2">
+                    <h3 class="bento-title"><i class="fa-solid fa-clipboard-list"></i> Action Plan</h3>
+                    <div class="action-box">
+                        <div class="urgency-badge" id="urgencyBadge">
+                            <i class="fa-solid fa-bell"></i> <span id="urgencyText">Routine Checkup</span>
+                        </div>
+                        <div class="action-steps" id="actionSteps">
+                            <!-- JS populated list of gentle, readable actions -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- B: Disease Risk Breakdown -->
+                <div class="glass-panel bento-item col-span-6 animate-in delay-3">
+                    <h3 class="bento-title"><i class="fa-solid fa-chart-bar"></i> Specific Risk Breakdown</h3>
+                    <p class="text-sm text-muted mb-3">Probability indicators based on your current vitals.</p>
+                    <div class="disease-risk-list" id="riskList">
+                        <!-- JS populated progress bars -->
+                    </div>
+                </div>
+
+                <!-- D: Explanation Section (USER-FRIENDLY) -->
+                <div class="glass-panel bento-item col-span-6 animate-in delay-3">
+                    <h3 class="bento-title"><i class="fa-solid fa-magnifying-glass-chart"></i> Why did we get this result?</h3>
+                    <p class="text-sm text-muted mb-3">Your risk is currently most influenced by these factors:</p>
+                    <div class="factor-list" id="factorList">
+                        <!-- JS populated simple human terms -->
+                    </div>
+                </div>
+
+                <!-- F: Doctor Recommendation Section -->
+                <div class="glass-panel bento-item col-span-12 animate-in delay-4 mt-2">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end;" class="mb-3">
+                        <div>
+                            <h3 class="bento-title mb-1"><i class="fa-solid fa-user-doctor"></i> Find a Specialist Nearby</h3>
+                            <p class="text-sm text-muted">Recommended for your condition based on your location.</p>
+                        </div>
+                    </div>
+                    <div class="doctor-cards" id="doctorLinks">
+                        <!-- JS populated OSM facilities -->
+                    </div>
+                </div>
+
+                <!-- G: Nearby Hospitals/Facilities Section -->
+                <div class="glass-panel bento-item col-span-12 animate-in delay-4 mt-2">
+                    <div class="mb-3">
+                        <h3 class="bento-title mb-1"><i class="fa-solid fa-hospital"></i> Nearby Healthcare Facilities</h3>
+                        <p class="text-sm text-muted">General hospitals and clinics in your area.</p>
+                    </div>
+                    <div class="doctor-cards" id="facilityLinks">
+                        <!-- JS populated OSM facilities -->
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- G: Confidence & Disclaimer Section (TRUST LAYER) -->
+            <div class="disclaimer-section animate-in delay-4">
+                <div class="confidence-badge">
+                    <i class="fa-solid fa-shield-halved" id="confIcon"></i>
+                    <span>Confidence Level: <strong id="confLevelText">High</strong></span>
+                </div>
+                <div class="disclaimer-text">
+                    <i class="fa-solid fa-circle-info" style="margin-top:2px;"></i>
+                    <span>This is a clinical decision-support system and not a definitive medical diagnosis. Always consult with a qualified healthcare professional.</span>
                 </div>
             </div>
-        </header>
 
-        <main class="container">
-            <!-- VIEW 1: INPUT FORM -->
-            <section id="input-view" class="view active-view">
-                <div class="form-container glass-card scale-in">
-                    <div class="card-header">
-                        <h2><i class="fa-solid fa-clipboard-user"></i> Patient Clinical Data</h2>
-                        <p class="subtitle">Enter the patient's current diagnostics to generate an empirically evaluated risk profile.</p>
-                    </div>
-                    
-                    <form id="prediction-form">
-                        <!-- Patient Core Info -->
-                        <div class="form-grid">
-                            <div class="input-group">
-                                <label>Age</label>
-                                <input type="number" id="age" required placeholder="e.g. 65">
-                            </div>
-                            <div class="input-group">
-                                <label>BMI</label>
-                                <input type="number" id="bmi" step="0.1" required placeholder="e.g. 33.6">
-                            </div>
-                            <div class="input-group">
-                                <label>Glucose Level (mg/dL)</label>
-                                <input type="number" id="glucose" required placeholder="e.g. 160">
-                            </div>
-                            <div class="input-group">
-                                <label>Systolic Blood Pressure</label>
-                                <input type="number" id="bp" required placeholder="e.g. 150">
-                            </div>
-                            <div class="input-group">
-                                <label>Pre-existing Hypertension</label>
-                                <select id="hypertension">
-                                    <option value="0">No</option>
-                                    <option value="1">Yes</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label>Patient Location (City)</label>
-                                <input type="text" id="location" required placeholder="e.g. Chicago">
-                            </div>
-                        </div>
+        </section>
 
-                        <!-- Action Bar -->
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" onclick="autoFillMockData()">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Example Profile
-                            </button>
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                <span id="submitText">Generate Analysis</span>
-                                <i class="fa-solid fa-arrow-right" id="submitIcon"></i>
-                                <div class="loader hidden" id="submitLoader"></div>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            <!-- VIEW 2: RESULTS DASHBOARD -->
-            <section id="results-view" class="view">
-                <div class="dashboard-header fade-in">
-                    <div>
-                        <h2><i class="fa-solid fa-chart-pie"></i> Clinical Decision Support Dashboard</h2>
-                        <p class="subtitle mt-1">Providing actionable intelligence derived from the risk bounds.</p>
-                    </div>
-                    <button class="btn btn-secondary btn-small" onclick="resetView()">
-                        <i class="fa-solid fa-arrow-rotate-left"></i> New Patient
-                    </button>
-                </div>
-
-                <div class="dashboard-grid">
-                    
-                    <!-- CHRI Score & Overall Risk -->
-                    <div class="glass-card chri-card fade-in" style="animation-delay: 0.1s;">
-                        <h3>Cardiometabolic Health Risk Index</h3>
-                        <div class="chri-ui">
-                            <div class="radial-progress" id="chriCircle">
-                                <div class="inner-circle">
-                                    <span class="score-value" id="resCHRI">0.0</span>
-                                </div>
-                            </div>
-                            <div class="chri-text">
-                                <p class="risk-label" id="resRiskLevel">Moderate</p>
-                                <p class="risk-desc">An empirical meta-model aggregation of multiple disease risk probabilities.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="glass-card actions-card fade-in" style="animation-delay: 0.2s;">
-                        <h3><i class="fa-solid fa-triangle-exclamation"></i> Suggested Actions</h3>
-                        <div class="urgency-banner" id="resUrgency">Routine</div>
-                        <ul id="actionList" class="action-list">
-                            <!-- JS populated -->
-                        </ul>
-                    </div>
-
-                    <!-- Disease Probabilities -->
-                    <div class="glass-card prob-card fade-in" style="animation-delay: 0.3s;">
-                        <h3><i class="fa-solid fa-virus"></i> Model Probabilities</h3>
-                        <div class="prob-list" id="diseaseList">
-                             <!-- JS populated -->
-                        </div>
-                    </div>
-
-                    <!-- Explainability -->
-                    <div class="glass-card xai-card fade-in" style="animation-delay: 0.4s;">
-                        <h3><i class="fa-solid fa-microscope"></i> Driving Risk Factors</h3>
-                        <p class="subtitle" style="font-size:0.8rem; margin-top:-5px; margin-bottom:15px; color:var(--text-muted)">Derived via Permutation Importance</p>
-                        <div id="xaiList" class="xai-list">
-                            <!-- JS populated -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Doctor Recommendations -->
-                <div class="glass-card mt-2 fade-in" style="animation-delay: 0.5s;">
-                    <h3><i class="fa-solid fa-user-doctor"></i> Regional Specialists</h3>
-                    <p class="subtitle mb-2">Live routing nearest medical facilities from OpenStreetMap API.</p>
-                    <div id="doctorList" class="doctor-grid">
-                        <!-- JS populated -->
-                    </div>
-                </div>
-
-            </section>
-        </main>
-    </div>
+    </main>
 
     <script src="app.js"></script>
 </body>

@@ -43,7 +43,10 @@ async def recommend_facilities(data: LocationFacilitiesInput):
     Recommend nearby healthcare facilities based on a location (Simulated Google Maps API).
     """
     try:
-        facilities = recommendation_service.fetch_nearby_facilities_mock(location=data.location)
+        facilities = recommendation_service.fetch_nearby_facilities_mock(
+            location=data.location,
+            disease_focus=data.disease_focus
+        )
         return facilities
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

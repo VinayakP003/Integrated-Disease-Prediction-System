@@ -43,14 +43,19 @@ class DoctorOutput(BaseModel):
     location: str
     rating: float
     availability: str
+    patient_review: Optional[str] = None
+    booking_url: Optional[str] = None
+    maps_url: Optional[str] = None
 
 class LocationFacilitiesInput(BaseModel):
     location: str
+    disease_focus: Optional[str] = None
 
     class Config:
         json_schema_extra = {
             "example": {
-                "location": "San Francisco"
+                "location": "Mumbai",
+                "disease_focus": "Heart Disease"
             }
         }
 
