@@ -13,7 +13,8 @@ ENV/
 
 # Large Files / Temporary
 *.pptx
-!Capstone_Midterm_Presentation_Final_Professional.pptx
+!Integrated_Disease_Prediction_Final_Presentation.pptx
+!docs/images/*.png
 training_log.txt
 eda_output.txt
 chatgpt_review_bundle.md

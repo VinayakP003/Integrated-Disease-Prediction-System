@@ -156,14 +156,35 @@ class RecommendationService:
             recommended_specialists.add("Nephrologist")
             suggested_actions.append("High Chronic Kidney Disease risk detected. Perform kidney function test and consult a Nephrologist.")
 
-        # Default fallback if specialists are empty but risk is moderate/high
-        if overall_risk_level in ["Moderate", "High"] and not recommended_specialists:
-            recommended_specialists.add("General Practitioner")
+        # Determine Primary Specialist for frontend focus based on ACTUAL highest risk
+        # This ensures the "Action Plan" and "Doctor Recommendations" are always in sync
+        disease_map = {
+            'stroke_risk': 'Neurologist',
+            'heart_risk': 'Cardiologist',
+            'ckd_risk': 'Nephrologist',
+            'diabetes_risk': 'Endocrinologist'
+        }
+        
+        # Find which disease has the highest numeric risk
+        max_risk_val = -1.0
+        primary_specialist = "General Practitioner"
+        
+        for risk_key, spec_name in disease_map.items():
+            current_val = risks.get(risk_key, 0.0)
+            if current_val > max_risk_val:
+                max_risk_val = current_val
+                if current_val >= 0.4: # Only focus on specialists if risk is at least Moderate
+                    primary_specialist = spec_name
+
+        # If no specific disease is high but CHRI is high, default to Cardiologist as it's the primary driver of CHRI
+        if primary_specialist == "General Practitioner" and risks.get('chri_score', 0.0) >= 0.4:
+            primary_specialist = "Cardiologist"
 
         return {
             "risk_level": overall_risk_level,
             "urgency_level": urgency_level,
             "recommended_specialists": list(recommended_specialists) if recommended_specialists else ["General Practitioner"],
+            "primary_specialist": primary_specialist,
             "suggested_actions": suggested_actions
         }
 

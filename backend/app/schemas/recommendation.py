@@ -23,6 +23,7 @@ class ActionRecommendationOutput(BaseModel):
     risk_level: str
     urgency_level: str
     recommended_specialists: List[str]
+    primary_specialist: str
     suggested_actions: List[str]
 
 class DoctorInput(BaseModel):

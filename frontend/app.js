@@ -15,6 +15,7 @@ function autoFillMockData() {
     document.getElementById('glucose').value = 175;
     document.getElementById('bp').value = 155;
     document.getElementById('hypertension').value = "1";
+    document.getElementById('smoking').value = "smokes";
     document.getElementById('location').value = "Mumbai";
 }
 
@@ -45,7 +46,7 @@ function buildPayload() {
     const glucose = parseFloat(document.getElementById('glucose').value);
     const hypertension = parseInt(document.getElementById('hypertension').value);
     const bp = parseFloat(document.getElementById('bp').value);
-    const smoking = "never smoked"; // Better baseline
+    const smoking = document.getElementById('smoking').value;
     const htnStr = hypertension === 1 ? "yes" : "no";
 
     return {
@@ -95,24 +96,25 @@ form.addEventListener('submit', async (e) => {
 
 // Humanize feature names
 const featureDict = {
-    'glucose': 'blood sugar levels',
-    'avg_glucose_level': 'blood sugar levels',
-    'age': 'age-related factors',
-    'bmi': 'body mass index (weight)',
-    'trestbps': 'blood pressure',
-    'BloodPressure': 'blood pressure',
-    'bp': 'blood pressure',
-    'hypertension': 'history of high blood pressure',
-    'chol': 'cholesterol levels',
-    'heart_disease': 'cardiovascular history',
-    'bgr': 'blood glucose levels',
-    'al': 'albumin (kidney protein)',
-    'hemo': 'hemoglobin levels',
-    'pcv': 'packed cell volume (blood density)',
-    'sg': 'urine specific gravity',
-    'su': 'sugar in urine',
-    'sc': 'serum creatinine',
-    'bu': 'blood urea levels'
+    'glucose': { name: 'blood sugar levels', icon: 'fa-droplet' },
+    'avg_glucose_level': { name: 'blood sugar levels', icon: 'fa-droplet' },
+    'age': { name: 'age-related factors', icon: 'fa-calendar-days' },
+    'bmi': { name: 'body mass index (weight)', icon: 'fa-weight-scale' },
+    'trestbps': { name: 'blood pressure', icon: 'fa-heart-pulse' },
+    'bloodpressure': { name: 'blood pressure', icon: 'fa-heart-pulse' },
+    'bp': { name: 'blood pressure', icon: 'fa-heart-pulse' },
+    'hypertension': { name: 'hypertension history', icon: 'fa-gauge-high' },
+    'smoking_status': { name: 'smoking habits', icon: 'fa-smoking' },
+    'chol': { name: 'cholesterol levels', icon: 'fa-vial' },
+    'heart_disease': { name: 'cardiovascular history', icon: 'fa-heart' },
+    'bgr': { name: 'blood glucose levels', icon: 'fa-droplet' },
+    'al': { name: 'albumin (kidney protein)', icon: 'fa-microscope' },
+    'hemo': { name: 'hemoglobin levels', icon: 'fa-dna' },
+    'pcv': { name: 'packed cell volume', icon: 'fa-vials' },
+    'sg': { name: 'urine specific gravity', icon: 'fa-flask' },
+    'su': { name: 'sugar in urine', icon: 'fa-flask-vial' },
+    'sc': { name: 'serum creatinine', icon: 'fa-clipboard-check' },
+    'bu': { name: 'blood urea levels', icon: 'fa-clipboard-list' }
 };
 
 function humanize(feat) {
@@ -120,7 +122,7 @@ function humanize(feat) {
     for (const key in featureDict) {
         if(raw.includes(key.toLowerCase())) return featureDict[key];
     }
-    return raw.replace(/_/g, ' ');
+    return { name: raw.replace(/_/g, ' '), icon: 'fa-chart-simple' };
 }
 
 function getStyleForRisk(val) {
@@ -150,7 +152,7 @@ function generateSummaryPhrase(data, topFeatures) {
         prioritySpan = `Your overall risk is low, though <strong>${highest.name}</strong> was slightly more notable, `;
     }
 
-    let driversList = topFeatures.map(f => humanize(f.feature)).join(' and ');
+    let driversList = topFeatures.map(f => humanize(f.feature).name).join(' and ');
     if (driversList === "") driversList = "various metabolic factors";
 
     let actionStr = "Regular monitoring is encouraged.";
@@ -175,9 +177,24 @@ function populateDashboard(data, loc) {
     diseasesList.sort((a,b) => b.val - a.val);
     let highestDisease = diseasesList[0].name;
 
-    // Issue Fix: If patient has high cardiometabolic index, focus on Cardiologist instead of Neurologist/Nephrologist explicitly
-    if (data.chri_score >= 0.4 && (highestDisease === "Stroke" || highestDisease === "Chronic Kidney Disease")) {
-        highestDisease = "Heart Disease";
+    // ALIGNMENT FIX: Use the backend's clinical logic for the primary specialist
+    // This ensures that if the Action Plan suggests a Neurologist, the Doctor Section shows a Neurologist.
+    const specMapping = {
+        "Cardiologist": "Heart Disease",
+        "Endocrinologist": "Diabetes",
+        "Neurologist": "Stroke",
+        "Nephrologist": "Chronic Kidney Disease"
+    };
+    
+    if (data.recommendations && data.recommendations.primary_specialist) {
+        if (data.recommendations.primary_specialist === "General Practitioner") {
+            highestDisease = "General Practitioner";
+        } else {
+            const mappedDisease = specMapping[data.recommendations.primary_specialist];
+            if (mappedDisease) {
+                highestDisease = mappedDisease;
+            }
+        }
     }
 
     // 1. Overall Score (Convert 0.0-1.0 to 0-100 for better user understanding)
@@ -221,7 +238,7 @@ function populateDashboard(data, loc) {
 
     // 3. Extract Top Features for Summary & Display (Deduplicate by Human Name)
     // CRITICAL: Only explain features that the user actually provided to maintain transparency
-    const userInputs = ['age', 'bmi', 'glucose', 'bp', 'bloodpressure', 'trestbps', 'hypertension', 'avg_glucose_level', 'bgr'];
+    const userInputs = ['age', 'bmi', 'glucose', 'bp', 'bloodpressure', 'trestbps', 'hypertension', 'avg_glucose_level', 'bgr', 'smoking_status'];
     
     let extractedFeatures = [];
     let seenHumanNames = new Set();
@@ -233,10 +250,10 @@ function populateDashboard(data, loc) {
             const isUserProvided = userInputs.some(input => featLower.includes(input));
             
             if (isUserProvided) {
-                let hName = humanize(f.feature);
-                if(!seenHumanNames.has(hName)) {
+                let hInfo = humanize(f.feature);
+                if(!seenHumanNames.has(hInfo.name)) {
                     extractedFeatures.push(f);
-                    seenHumanNames.add(hName);
+                    seenHumanNames.add(hInfo.name);
                 }
             }
         });
@@ -296,15 +313,31 @@ function populateDashboard(data, loc) {
     }
 
     topFactors.forEach(f => {
-        let humanName = humanize(f.feature);
+        let info = humanize(f.feature);
         let dot = f.importance === 'high' ? 'dot-high' : 'dot-med';
         let impactClass = f.importance === 'high' ? 'impact-high' : 'impact-med';
         let impactText = f.importance === 'high' ? 'High Impact' : 'Moderate';
         
+        // Add specific detail if it's smoking or hypertension
+        let detail = "";
+        if (f.feature.includes('smoking')) {
+            const val = document.getElementById('smoking').value;
+            detail = `<div class="factor-detail">Status: ${val}</div>`;
+        } else if (f.feature.includes('hypertension') || f.feature.includes('trestbps')) {
+            const val = document.getElementById('bp').value;
+            detail = `<div class="factor-detail">Current: ${val} mmHg</div>`;
+        } else if (f.feature.includes('bmi')) {
+            const val = document.getElementById('bmi').value;
+            detail = `<div class="factor-detail">Value: ${val}</div>`;
+        }
+
         fList.innerHTML += `
             <div class="factor-item">
-                <div class="factor-dot ${dot}"></div>
-                <div style="text-transform: capitalize; font-size: 0.9rem; font-weight: 500;">${humanName}</div>
+                <i class="fa-solid ${info.icon} factor-icon" style="color: ${f.importance === 'high' ? 'var(--health-alert)' : 'var(--health-warn)'}"></i>
+                <div class="factor-content">
+                    <div class="factor-name">${info.name}</div>
+                    ${detail}
+                </div>
                 <div class="impact-badge ${impactClass}">${impactText}</div>
             </div>
         `;

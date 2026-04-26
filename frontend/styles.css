@@ -455,25 +455,47 @@ h1, h2, h3, h4, .number-callout {
 @media (max-width: 600px) { .factor-list { grid-template-columns: 1fr; } }
 
 .factor-item {
-    background: #f9fafb;
-    padding: 1rem;
-    border-radius: var(--radius-sm);
+    background: #ffffff;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
     border: 1px solid var(--glass-border);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.factor-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.factor-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.dot-high { background: var(--health-alert); box-shadow: 0 0 10px rgba(220, 38, 38, 0.4); }
-.dot-med  { background: var(--health-warn); box-shadow: 0 0 10px rgba(217, 119, 6, 0.4); }
-.dot-low  { background: var(--health-good); box-shadow: 0 0 10px rgba(5, 150, 105, 0.4); }
+.factor-icon {
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+.factor-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.factor-name {
+    text-transform: capitalize;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.factor-detail {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.factor-dot { display: none; } /* Replaced by icons */
 
 .impact-badge {
     font-size: 0.65rem;

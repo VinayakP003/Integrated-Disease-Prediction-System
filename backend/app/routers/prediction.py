@@ -120,6 +120,8 @@ async def predict_chri(data: CHRIPredictionInput):
             "recommendations": {
                 "urgency_level": action_recs["urgency_level"],
                 "suggested_actions": action_recs["suggested_actions"],
+                "recommended_specialists": action_recs["recommended_specialists"],
+                "primary_specialist": action_recs["primary_specialist"],
                 "recommended_doctors": doctors
             }
         }
