@@ -97,7 +97,9 @@ class RecommendationService:
             {"doctor_name": "Dr. Arjun Verma", "specialization": "Neurologist", "location": "Pune", "rating": 5.0, "availability": "Immediate", "patient_review": "Excellent diagnosis and treatment. I felt very safe and well-cared for under Dr. Verma."},
             {"doctor_name": "Dr. Priya Iyer", "specialization": "Neurologist", "location": "Chennai", "rating": 4.8, "availability": "Next week", "patient_review": "Very professional and friendly. The wait time was short and the consultation was very helpful."},
             {"doctor_name": "Dr. Sameer Khan", "specialization": "Nephrologist", "location": "Kolkata", "rating": 4.7, "availability": "Within 2 weeks", "patient_review": "Highly skilled and dedicated doctor. Provided great guidance for my kidney health."},
-            {"doctor_name": "Dr. Kavita Singh", "specialization": "Nephrologist", "location": "Ahmedabad", "rating": 4.5, "availability": "Next week", "patient_review": "Good experience overall. The doctor was very clear about the next steps and medications."}
+            {"doctor_name": "Dr. Kavita Singh", "specialization": "Nephrologist", "location": "Ahmedabad", "rating": 4.5, "availability": "Next week", "patient_review": "Good experience overall. The doctor was very clear about the next steps and medications."},
+            {"doctor_name": "Dr. Amit Desai", "specialization": "General Practitioner", "location": "Mumbai", "rating": 4.8, "availability": "Tomorrow", "patient_review": "Very attentive and gives great general health advice. Highly recommend for routine checkups."},
+            {"doctor_name": "Dr. Neha Sharma", "specialization": "General Practitioner", "location": "Delhi", "rating": 4.7, "availability": "This week", "patient_review": "Friendly doctor who listens to all your problems carefully."}
         ]
 
     def get_action_recommendation(self, risks: dict) -> dict:
@@ -113,48 +115,83 @@ class RecommendationService:
 
         # 1. Evaluate CHRI (Primary Urgency Driver)
         chri = risks.get('chri_score', 0.0)
+        chri_action = None
         if chri >= 0.6:
             urgency_level = "Urgent"
             overall_risk_level = "Critical"
-            suggested_actions.append("Your Cardiometabolic Health Risk Index is critically high. Seek immediate medical consultation.")
+            chri_action = "Your Cardiometabolic Health Risk Index is critically high. Seek immediate medical consultation."
             recommended_specialists.add("Cardiologist")
             recommended_specialists.add("Endocrinologist")
         elif chri >= 0.4:
             urgency_level = "High Priority"
             overall_risk_level = "High"
-            suggested_actions.append("Your overall risk is elevated. Schedule a comprehensive health checkup soon.")
+            chri_action = "Your overall risk is elevated. Schedule a comprehensive health checkup soon."
             recommended_specialists.add("Cardiologist")
         elif chri >= 0.2:
             urgency_level = "Moderate"
             overall_risk_level = "Moderate"
-            suggested_actions.append("Consider moderate lifestyle improvements: diet, exercise, and regular monitoring.")
+            chri_action = "Consider moderate lifestyle improvements: diet, exercise, and regular monitoring."
         else:
             urgency_level = "Routine"
             overall_risk_level = "Low"
-            suggested_actions.append("Maintain your current healthy lifestyle and continue annual checkups.")
+            chri_action = "Maintain your current healthy lifestyle and continue annual checkups."
+
+        has_elevated_risk = False
 
         # 2. Disease-Specific Rules
         if risks.get('heart_risk', 0.0) >= 0.7:
+            has_elevated_risk = True
             recommended_specialists.add("Cardiologist")
             suggested_actions.append("High Heart Disease risk detected. Advised to get an ECG and consult a Cardiologist.")
+            if urgency_level not in ["Urgent"]: urgency_level = "High Priority"
+            if overall_risk_level not in ["Critical"]: overall_risk_level = "High"
         elif risks.get('heart_risk', 0.0) >= 0.5:
+            has_elevated_risk = True
             suggested_actions.append("Elevated Heart Disease risk. Monitor blood pressure and cholesterol.")
+            if urgency_level in ["Routine"]: urgency_level = "Moderate"
+            if overall_risk_level in ["Low"]: overall_risk_level = "Moderate"
 
         if risks.get('diabetes_risk', 0.0) >= 0.7:
+            has_elevated_risk = True
             recommended_specialists.add("Endocrinologist")
             suggested_actions.append("High Diabetes risk detected. Perform fasting blood sugar test and consult an Endocrinologist.")
+            if urgency_level not in ["Urgent"]: urgency_level = "High Priority"
+            if overall_risk_level not in ["Critical"]: overall_risk_level = "High"
         elif risks.get('diabetes_risk', 0.0) >= 0.5:
+            has_elevated_risk = True
             suggested_actions.append("Elevated Diabetes risk. Limit sugar intake and increase physical activity.")
+            if urgency_level in ["Routine"]: urgency_level = "Moderate"
+            if overall_risk_level in ["Low"]: overall_risk_level = "Moderate"
 
         if risks.get('stroke_risk', 0.0) >= 0.7:
+            has_elevated_risk = True
             recommended_specialists.add("Neurologist")
-            if urgency_level not in ["Urgent", "High Priority"]:
-                urgency_level = "High Priority"
             suggested_actions.append("High Stroke risk detected. Urgent: Consult a Neurologist and monitor blood pressure strictly.")
+            if urgency_level not in ["Urgent"]: urgency_level = "High Priority"
+            if overall_risk_level not in ["Critical"]: overall_risk_level = "High"
+        elif risks.get('stroke_risk', 0.0) >= 0.5:
+            has_elevated_risk = True
+            suggested_actions.append("Elevated Stroke risk. Manage blood pressure and adopt a healthier lifestyle.")
+            if urgency_level in ["Routine"]: urgency_level = "Moderate"
+            if overall_risk_level in ["Low"]: overall_risk_level = "Moderate"
 
         if risks.get('ckd_risk', 0.0) >= 0.7:
+            has_elevated_risk = True
             recommended_specialists.add("Nephrologist")
             suggested_actions.append("High Chronic Kidney Disease risk detected. Perform kidney function test and consult a Nephrologist.")
+            if urgency_level not in ["Urgent"]: urgency_level = "High Priority"
+            if overall_risk_level not in ["Critical"]: overall_risk_level = "High"
+        elif risks.get('ckd_risk', 0.0) >= 0.5:
+            has_elevated_risk = True
+            suggested_actions.append("Elevated CKD risk. Monitor kidney function and reduce sodium intake.")
+            if urgency_level in ["Routine"]: urgency_level = "Moderate"
+            if overall_risk_level in ["Low"]: overall_risk_level = "Moderate"
+
+        # Apply CHRI action only if it doesn't conflict, or if it's the only issue
+        if not has_elevated_risk:
+            suggested_actions.insert(0, chri_action)
+        elif chri >= 0.4:
+            suggested_actions.insert(0, chri_action)
 
         # Determine Primary Specialist for frontend focus based on ACTUAL highest risk
         # This ensures the "Action Plan" and "Doctor Recommendations" are always in sync
@@ -317,9 +354,10 @@ class RecommendationService:
                         r_doc["location"] = location.title()
                     results.append(r_doc)
             
-            # If no exact matched mock doctor, return the first available
+            # If no exact matched mock doctor, return a GP or the first available
             if not results and self.doctors_db:
-                r_doc = self.doctors_db[0].copy()
+                fallback_doc = next((d for d in self.doctors_db if d["specialization"] == "General Practitioner"), self.doctors_db[0])
+                r_doc = fallback_doc.copy()
                 if location:
                     r_doc["location"] = location.title()
                 results.append(r_doc)
